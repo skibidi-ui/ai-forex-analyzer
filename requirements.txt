@@ -1,6 +1,7 @@
 streamlit
 openai
 pandas-ta
+numpy>=1.21.0
 requests
 plotly
 setuptools>=65.5.0
