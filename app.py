@@ -10,14 +10,16 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 twelve_api_key = os.getenv("TWELVE_DATA_API_KEY")
 
 st.sidebar.title("Forex Settings")
-symbol = st.sidebar.text_input("Currency Pair (e.g. EUR/USD)", value="EUR/USD")
+symbol_input = st.sidebar.text_input("Currency Pair (e.g. EUR/USD or EURUSD)", value="EUR/USD")
 timeframe = st.sidebar.selectbox("Timeframe", ["1min", "5min", "15min", "30min", "1h"])
 
 st.title("📊 AI Forex Chart Analyzer")
 st.write("This app pulls Forex data, shows the chart, and uses AI to rate Buy/Sell signals from 1 (risky) to 10 (very sure).")
 
 def fetch_data(symbol, interval):
-    url = f"https://api.twelvedata.com/time_series?symbol={symbol.replace('/', '')}&interval={interval}&apikey={twelve_api_key}&outputsize=50"
+    # Clean symbol by removing slashes and uppercasing
+    clean_symbol = symbol.replace("/", "").upper()
+    url = f"https://api.twelvedata.com/time_series?symbol={clean_symbol}&interval={interval}&apikey={twelve_api_key}&outputsize=50"
     response = requests.get(url).json()
     if "values" in response:
         df = pd.DataFrame(response['values'])
@@ -49,7 +51,7 @@ def get_signal_from_ai(df):
     except Exception as e:
         return f"Error: {e}"
 
-data = fetch_data(symbol, timeframe)
+data = fetch_data(symbol_input, timeframe)
 if data is not None:
     fig = go.Figure(data=[
         go.Candlestick(
@@ -60,7 +62,7 @@ if data is not None:
             close=data["close"]
         )
     ])
-    fig.update_layout(title=f"{symbol} Chart ({timeframe})", xaxis_title="Time", yaxis_title="Price")
+    fig.update_layout(title=f"{symbol_input.upper()} Chart ({timeframe})", xaxis_title="Time", yaxis_title="Price")
     st.plotly_chart(fig)
 
     st.subheader("💡 AI Signal Recommendation")
