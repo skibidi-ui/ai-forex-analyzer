@@ -3,3 +3,4 @@ openai
 pandas-ta
 requests
 plotly
+setuptools>=65.5.0
